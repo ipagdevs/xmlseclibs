@@ -105,9 +105,10 @@ class XMLSecurityDSig
     private $validatedNodes = null;
 
     /**
-     * @param string $prefix
+     * @param string $prefix Allows custom namespace prefix for the dsig elements
+     * @param array{preserve_whitespace?: bool} $options Additional options
      */
-    public function __construct($prefix='ds')
+    public function __construct($prefix = 'ds', array $options = [])
     {
         $template = self::BASE_TEMPLATE;
         if (! empty($prefix)) {
@@ -117,6 +118,7 @@ class XMLSecurityDSig
             $template = str_replace($search, $replace, $template);
         }
         $sigdoc = new DOMDocument();
+        $sigdoc->preserveWhiteSpace = boolval($options['preserve_whitespace'] ?? $sigdoc->preserveWhiteSpace);
         $sigdoc->loadXML($template);
         $this->sigNode = $sigdoc->documentElement;
     }
