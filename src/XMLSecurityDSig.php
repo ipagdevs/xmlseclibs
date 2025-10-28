@@ -1,12 +1,13 @@
 <?php
-namespace RobRichards\XMLSecLibs;
+
+namespace TeamIpag\XMLSecLibs;
 
 use DOMDocument;
 use DOMElement;
 use DOMNode;
 use DOMXPath;
 use Exception;
-use RobRichards\XMLSecLibs\Utils\XPath as XPath;
+use TeamIpag\XMLSecLibs\Utils\XPath as XPath;
 
 /**
  * xmlseclibs.php
@@ -112,7 +113,7 @@ class XMLSecurityDSig
     {
         $template = self::BASE_TEMPLATE;
         if (! empty($prefix)) {
-            $this->prefix = $prefix.':';
+            $this->prefix = $prefix . ':';
             $search = array("<S", "</S", "xmlns=");
             $replace = array("<$prefix:S", "</$prefix:S", "xmlns:$prefix=");
             $template = str_replace($search, $replace, $template);
@@ -153,14 +154,14 @@ class XMLSecurityDSig
      *
      * @return string The generated guid
      */
-    public static function generateGUID($prefix='pfx')
+    public static function generateGUID($prefix = 'pfx')
     {
         $uuid = md5(uniqid(mt_rand(), true));
-        $guid = $prefix.substr($uuid, 0, 8)."-".
-                substr($uuid, 8, 4)."-".
-                substr($uuid, 12, 4)."-".
-                substr($uuid, 16, 4)."-".
-                substr($uuid, 20, 12);
+        $guid = $prefix . substr($uuid, 0, 8) . "-" .
+            substr($uuid, 8, 4) . "-" .
+            substr($uuid, 12, 4) . "-" .
+            substr($uuid, 16, 4) . "-" .
+            substr($uuid, 20, 12);
         return $guid;
     }
 
@@ -173,7 +174,7 @@ class XMLSecurityDSig
      *
      * @deprecated Method deprecated in Release 1.4.1
      */
-    public static function generate_GUID($prefix='pfx')
+    public static function generate_GUID($prefix = 'pfx')
     {
         return self::generateGUID($prefix);
     }
@@ -183,7 +184,7 @@ class XMLSecurityDSig
      * @param int $pos
      * @return DOMNode|null
      */
-    public function locateSignature($objDoc, $pos=0)
+    public function locateSignature($objDoc, $pos = 0)
     {
         if ($objDoc instanceof DOMDocument) {
             $doc = $objDoc;
@@ -211,13 +212,13 @@ class XMLSecurityDSig
      * @param null|string $value
      * @return DOMElement
      */
-    public function createNewSignNode($name, $value=null)
+    public function createNewSignNode($name, $value = null)
     {
         $doc = $this->sigNode->ownerDocument;
         if (! is_null($value)) {
-            $node = $doc->createElementNS(self::XMLDSIGNS, $this->prefix.$name, $value);
+            $node = $doc->createElementNS(self::XMLDSIGNS, $this->prefix . $name, $value);
         } else {
-            $node = $doc->createElementNS(self::XMLDSIGNS, $this->prefix.$name);
+            $node = $doc->createElementNS(self::XMLDSIGNS, $this->prefix . $name);
         }
         return $node;
     }
@@ -239,10 +240,10 @@ class XMLSecurityDSig
                 throw new Exception('Invalid Canonical Method');
         }
         if ($xpath = $this->getXPathObj()) {
-            $query = './'.$this->searchpfx.':SignedInfo';
+            $query = './' . $this->searchpfx . ':SignedInfo';
             $nodeset = $xpath->query($query, $this->sigNode);
             if ($sinfo = $nodeset->item(0)) {
-                $query = './'.$this->searchpfx.'CanonicalizationMethod';
+                $query = './' . $this->searchpfx . 'CanonicalizationMethod';
                 $nodeset = $xpath->query($query, $sinfo);
                 if (! ($canonNode = $nodeset->item(0))) {
                     $canonNode = $this->createNewSignNode('CanonicalizationMethod');
@@ -260,7 +261,7 @@ class XMLSecurityDSig
      * @param null|array $prefixList
      * @return string
      */
-    private function canonicalizeData($node, $canonicalmethod, $arXPath=null, $prefixList=null)
+    private function canonicalizeData($node, $canonicalmethod, $arXPath = null, $prefixList = null)
     {
         $exclusive = false;
         $withComments = false;
@@ -319,8 +320,7 @@ class XMLSecurityDSig
                 $prefixList = null;
                 if ($canonNode = $nodeset->item(0)) {
                     $canonicalmethod = $canonNode->getAttribute('Algorithm');
-                    foreach ($canonNode->childNodes as $node)
-                    {
+                    foreach ($canonNode->childNodes as $node) {
                         if ($node->localName == 'InclusiveNamespaces') {
                             if ($pfx = $node->getAttribute('PrefixList')) {
                                 $arpfx = array_filter(explode(' ', $pfx));
@@ -372,7 +372,6 @@ class XMLSecurityDSig
             $digest = base64_encode($digest);
         }
         return $digest;
-
     }
 
     /**
@@ -408,7 +407,7 @@ class XMLSecurityDSig
         $canonicalMethod = 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315';
         $arXPath = null;
         $prefixList = null;
-        foreach ($nodelist AS $transform) {
+        foreach ($nodelist as $transform) {
             $algorithm = $transform->getAttribute("Algorithm");
             switch ($algorithm) {
                 case 'http://www.w3.org/2001/10/xml-exc-c14n#':
@@ -429,7 +428,7 @@ class XMLSecurityDSig
                             if ($pfx = $node->getAttribute('PrefixList')) {
                                 $arpfx = array();
                                 $pfxlist = explode(" ", $pfx);
-                                foreach ($pfxlist AS $pfx) {
+                                foreach ($pfxlist as $pfx) {
                                     $val = trim($pfx);
                                     if (! empty($val)) {
                                         $arpfx[] = $val;
@@ -443,7 +442,7 @@ class XMLSecurityDSig
                         }
                         $node = $node->nextSibling;
                     }
-            break;
+                    break;
                 case 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315':
                 case 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments':
                     if (!$includeCommentNodes) {
@@ -461,10 +460,10 @@ class XMLSecurityDSig
                     while ($node) {
                         if ($node->localName == 'XPath') {
                             $arXPath = array();
-                            $arXPath['query'] = '(.//. | .//@* | .//namespace::*)['.$node->nodeValue.']';
+                            $arXPath['query'] = '(.//. | .//@* | .//namespace::*)[' . $node->nodeValue . ']';
                             $arXPath['namespaces'] = array();
                             $nslist = $xpath->query('./namespace::*', $node);
-                            foreach ($nslist AS $nsnode) {
+                            foreach ($nslist as $nsnode) {
                                 if ($nsnode->localName != "xml") {
                                     $arXPath['namespaces'][$nsnode->localName] = $nsnode->nodeValue;
                                 }
@@ -512,14 +511,14 @@ class XMLSecurityDSig
                             $xPath->registerNamespace($nspf, $ns);
                         }
                     }
-                    $iDlist = '@Id="'.XPath::filterAttrValue($identifier, XPath::DOUBLE_QUOTE).'"';
+                    $iDlist = '@Id="' . XPath::filterAttrValue($identifier, XPath::DOUBLE_QUOTE) . '"';
                     if (is_array($this->idKeys)) {
                         foreach ($this->idKeys as $idKey) {
-                            $iDlist .= " or @".XPath::filterAttrName($idKey).'="'.
-                                XPath::filterAttrValue($identifier, XPath::DOUBLE_QUOTE).'"';
+                            $iDlist .= " or @" . XPath::filterAttrName($idKey) . '="' .
+                                XPath::filterAttrValue($identifier, XPath::DOUBLE_QUOTE) . '"';
                         }
                     }
-                    $query = '//*['.$iDlist.']';
+                    $query = '//*[' . $iDlist . ']';
                     $dataObject = $xPath->query($query)->item(0);
                 } else {
                     $dataObject = $refNode->ownerDocument;
@@ -581,7 +580,7 @@ class XMLSecurityDSig
         if ($nodeset->length == 0) {
             throw new Exception("Reference nodes not found");
         }
-        foreach ($nodeset AS $refNode) {
+        foreach ($nodeset as $refNode) {
             $refids[] = $this->getRefNodeID($refNode);
         }
         return $refids;
@@ -609,7 +608,7 @@ class XMLSecurityDSig
         /* Initialize/reset the list of validated nodes. */
         $this->validatedNodes = array();
 
-        foreach ($nodeset AS $refNode) {
+        foreach ($nodeset as $refNode) {
             if (! $this->processRefNode($refNode)) {
                 /* Clear the list of validated nodes. */
                 $this->validatedNodes = null;
@@ -626,7 +625,7 @@ class XMLSecurityDSig
      * @param null|array $arTransforms
      * @param null|array $options
      */
-    private function addRefInternal($sinfoNode, $node, $algorithm, $arTransforms=null, $options=null)
+    private function addRefInternal($sinfoNode, $node, $algorithm, $arTransforms = null, $options = null)
     {
         $prefix = null;
         $prefix_ns = null;
@@ -644,7 +643,7 @@ class XMLSecurityDSig
 
         $attname = $id_name;
         if (! empty($prefix)) {
-            $attname = $prefix.':'.$attname;
+            $attname = $prefix . ':' . $attname;
         }
 
         $refNode = $this->createNewSignNode('Reference');
@@ -659,7 +658,7 @@ class XMLSecurityDSig
                 $uri = self::generateGUID();
                 $node->setAttributeNS($prefix_ns, $attname, $uri);
             }
-            $refNode->setAttribute("URI", '#'.$uri);
+            $refNode->setAttribute("URI", '#' . $uri);
         } elseif ($force_uri) {
             $refNode->setAttribute("URI", '');
         }
@@ -668,17 +667,19 @@ class XMLSecurityDSig
         $refNode->appendChild($transNodes);
 
         if (is_array($arTransforms)) {
-            foreach ($arTransforms AS $transform) {
+            foreach ($arTransforms as $transform) {
                 $transNode = $this->createNewSignNode('Transform');
                 $transNodes->appendChild($transNode);
-                if (is_array($transform) &&
+                if (
+                    is_array($transform) &&
                     (! empty($transform['http://www.w3.org/TR/1999/REC-xpath-19991116'])) &&
-                    (! empty($transform['http://www.w3.org/TR/1999/REC-xpath-19991116']['query']))) {
+                    (! empty($transform['http://www.w3.org/TR/1999/REC-xpath-19991116']['query']))
+                ) {
                     $transNode->setAttribute('Algorithm', 'http://www.w3.org/TR/1999/REC-xpath-19991116');
                     $XPathNode = $this->createNewSignNode('XPath', $transform['http://www.w3.org/TR/1999/REC-xpath-19991116']['query']);
                     $transNode->appendChild($XPathNode);
                     if (! empty($transform['http://www.w3.org/TR/1999/REC-xpath-19991116']['namespaces'])) {
-                        foreach ($transform['http://www.w3.org/TR/1999/REC-xpath-19991116']['namespaces'] AS $prefix => $namespace) {
+                        foreach ($transform['http://www.w3.org/TR/1999/REC-xpath-19991116']['namespaces'] as $prefix => $namespace) {
                             $XPathNode->setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:$prefix", $namespace);
                         }
                     }
@@ -709,7 +710,7 @@ class XMLSecurityDSig
      * @param null|array $arTransforms
      * @param null|array $options
      */
-    public function addReference($node, $algorithm, $arTransforms=null, $options=null)
+    public function addReference($node, $algorithm, $arTransforms = null, $options = null)
     {
         if ($xpath = $this->getXPathObj()) {
             $query = "./secdsig:SignedInfo";
@@ -726,13 +727,13 @@ class XMLSecurityDSig
      * @param null|array $arTransforms
      * @param null|array $options
      */
-    public function addReferenceList($arNodes, $algorithm, $arTransforms=null, $options=null)
+    public function addReferenceList($arNodes, $algorithm, $arTransforms = null, $options = null)
     {
         if ($xpath = $this->getXPathObj()) {
             $query = "./secdsig:SignedInfo";
             $nodeset = $xpath->query($query, $this->sigNode);
             if ($sInfo = $nodeset->item(0)) {
-                foreach ($arNodes AS $node) {
+                foreach ($arNodes as $node) {
                     $this->addRefInternal($sInfo, $node, $algorithm, $arTransforms, $options);
                 }
             }
@@ -745,7 +746,7 @@ class XMLSecurityDSig
      * @param null|string $encoding
      * @return DOMElement
      */
-    public function addObject($data, $mimetype=null, $encoding=null)
+    public function addObject($data, $mimetype = null, $encoding = null)
     {
         $objNode = $this->createNewSignNode('Object');
         $this->sigNode->appendChild($objNode);
@@ -770,7 +771,7 @@ class XMLSecurityDSig
      * @param null|DOMNode $node
      * @return null|XMLSecurityKey
      */
-    public function locateKey($node=null)
+    public function locateKey($node = null)
     {
         if (empty($node)) {
             $node = $this->sigNode;
@@ -866,16 +867,13 @@ class XMLSecurityDSig
         }
     }
 
-    public function appendCert()
-    {
-
-    }
+    public function appendCert() {}
 
     /**
      * @param XMLSecurityKey $objKey
      * @param null|DOMNode $parent
      */
-    public function appendKey($objKey, $parent=null)
+    public function appendKey($objKey, $parent = null)
     {
         $objKey->serializeKey($parent);
     }
@@ -921,7 +919,7 @@ class XMLSecurityDSig
      * @param bool $isPEMFormat
      * @return string
      */
-    public static function get509XCert($cert, $isPEMFormat=true)
+    public static function get509XCert($cert, $isPEMFormat = true)
     {
         $certs = self::staticGet509XCerts($cert, $isPEMFormat);
         if (! empty($certs)) {
@@ -935,14 +933,14 @@ class XMLSecurityDSig
      * @param bool $isPEMFormat
      * @return array
      */
-    public static function staticGet509XCerts($certs, $isPEMFormat=true)
+    public static function staticGet509XCerts($certs, $isPEMFormat = true)
     {
         if ($isPEMFormat) {
             $data = '';
             $certlist = array();
             $arCert = explode("\n", $certs);
             $inData = false;
-            foreach ($arCert AS $curData) {
+            foreach ($arCert as $curData) {
                 if (! $inData) {
                     if (strncmp($curData, '-----BEGIN CERTIFICATE', 22) == 0) {
                         $inData = true;
@@ -972,7 +970,7 @@ class XMLSecurityDSig
      * @param null|array $options
      * @throws Exception
      */
-    public static function staticAdd509Cert($parentRef, $cert, $isPEMFormat=true, $isURL=false, $xpath=null, $options=null)
+    public static function staticAdd509Cert($parentRef, $cert, $isPEMFormat = true, $isURL = false, $xpath = null, $options = null)
     {
         if ($isURL) {
             $cert = file_get_contents($cert);
@@ -994,10 +992,10 @@ class XMLSecurityDSig
         if (! $keyInfo) {
             $pfx = $parentRef->lookupPrefix(self::XMLDSIGNS);
             if (! empty($pfx)) {
-                $dsig_pfx = $pfx.":";
+                $dsig_pfx = $pfx . ":";
             }
             $inserted = false;
-            $keyInfo = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx.'KeyInfo');
+            $keyInfo = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx . 'KeyInfo');
 
             $query = "./secdsig:Object";
             $nodeset = $xpath->query($query, $parentRef);
@@ -1012,7 +1010,7 @@ class XMLSecurityDSig
         } else {
             $pfx = $keyInfo->lookupPrefix(self::XMLDSIGNS);
             if (! empty($pfx)) {
-                $dsig_pfx = $pfx.":";
+                $dsig_pfx = $pfx . ":";
             }
         }
 
@@ -1020,7 +1018,7 @@ class XMLSecurityDSig
         $certs = self::staticGet509XCerts($cert, $isPEMFormat);
 
         // Attach X509 data node
-        $x509DataNode = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx.'X509Data');
+        $x509DataNode = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx . 'X509Data');
         $keyInfo->appendChild($x509DataNode);
 
         $issuerSerial = false;
@@ -1037,11 +1035,11 @@ class XMLSecurityDSig
         // Attach all certificate nodes and any additional data
         foreach ($certs as $X509Cert) {
             if ($issuerSerial || $subjectName) {
-                if ($certData = openssl_x509_parse("-----BEGIN CERTIFICATE-----\n".chunk_split($X509Cert, 64, "\n")."-----END CERTIFICATE-----\n")) {
+                if ($certData = openssl_x509_parse("-----BEGIN CERTIFICATE-----\n" . chunk_split($X509Cert, 64, "\n") . "-----END CERTIFICATE-----\n")) {
                     if ($subjectName && ! empty($certData['subject'])) {
                         if (is_array($certData['subject'])) {
                             $parts = array();
-                            foreach ($certData['subject'] AS $key => $value) {
+                            foreach ($certData['subject'] as $key => $value) {
                                 if (is_array($value)) {
                                     foreach ($value as $valueElement) {
                                         array_unshift($parts, "$key=$valueElement");
@@ -1054,13 +1052,13 @@ class XMLSecurityDSig
                         } else {
                             $subjectNameValue = $certData['subject'];
                         }
-                        $x509SubjectNode = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx.'X509SubjectName', $subjectNameValue);
+                        $x509SubjectNode = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx . 'X509SubjectName', $subjectNameValue);
                         $x509DataNode->appendChild($x509SubjectNode);
                     }
                     if ($issuerSerial && ! empty($certData['issuer']) && ! empty($certData['serialNumber'])) {
                         if (is_array($certData['issuer'])) {
                             $parts = array();
-                            foreach ($certData['issuer'] AS $key => $value) {
+                            foreach ($certData['issuer'] as $key => $value) {
                                 array_unshift($parts, "$key=$value");
                             }
                             $issuerName = implode(',', $parts);
@@ -1068,18 +1066,17 @@ class XMLSecurityDSig
                             $issuerName = $certData['issuer'];
                         }
 
-                        $x509IssuerNode = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx.'X509IssuerSerial');
+                        $x509IssuerNode = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx . 'X509IssuerSerial');
                         $x509DataNode->appendChild($x509IssuerNode);
 
-                        $x509Node = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx.'X509IssuerName', $issuerName);
+                        $x509Node = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx . 'X509IssuerName', $issuerName);
                         $x509IssuerNode->appendChild($x509Node);
-                        $x509Node = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx.'X509SerialNumber', $certData['serialNumber']);
+                        $x509Node = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx . 'X509SerialNumber', $certData['serialNumber']);
                         $x509IssuerNode->appendChild($x509Node);
                     }
                 }
-
             }
-            $x509CertNode = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx.'X509Certificate', $X509Cert);
+            $x509CertNode = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx . 'X509Certificate', $X509Cert);
             $x509DataNode->appendChild($x509CertNode);
         }
     }
@@ -1090,7 +1087,7 @@ class XMLSecurityDSig
      * @param bool $isURL
      * @param null|array $options
      */
-    public function add509Cert($cert, $isPEMFormat=true, $isURL=false, $options=null)
+    public function add509Cert($cert, $isPEMFormat = true, $isURL = false, $options = null)
     {
         if ($xpath = $this->getXPathObj()) {
             self::staticAdd509Cert($this->sigNode, $cert, $isPEMFormat, $isURL, $xpath, $options);
@@ -1124,10 +1121,10 @@ class XMLSecurityDSig
             $dsig_pfx = '';
             $pfx = $parentRef->lookupPrefix(self::XMLDSIGNS);
             if (! empty($pfx)) {
-                $dsig_pfx = $pfx.":";
+                $dsig_pfx = $pfx . ":";
             }
             $inserted = false;
-            $keyInfo = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx.'KeyInfo');
+            $keyInfo = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx . 'KeyInfo');
 
             $query = "./secdsig:Object";
             $nodeset = $xpath->query($query, $parentRef);

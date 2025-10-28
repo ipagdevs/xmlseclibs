@@ -21,7 +21,7 @@ xmlseclibs requires PHP version 5.4 or greater. **5.6.24+ recommended for securi
 Install with [`composer.phar`](http://getcomposer.org).
 
 ```sh
-php composer.phar require "robrichards/xmlseclibs"
+php composer.phar require "teamipag/xmlseclibs"
 ```
 
 
@@ -38,15 +38,20 @@ xmlseclibs is being used in many different software.
 The example below shows basic usage of xmlseclibs, with a SHA-256 signature.
 
 ```php
-use RobRichards\XMLSecLibs\XMLSecurityDSig;
-use RobRichards\XMLSecLibs\XMLSecurityKey;
+use TeamIpag\XMLSecLibs\XMLSecurityDSig;
+use TeamIpag\XMLSecLibs\XMLSecurityKey;
 
 // Load the XML to be signed
 $doc = new DOMDocument();
 $doc->load('./path/to/file/tobesigned.xml');
 
 // Create a new Security object 
-$objDSig = new XMLSecurityDSig();
+$objDSig = new XMLSecurityDSig(prefix: 'ds', options: [
+    // Preserve or discard whitespaces loaded into the internal DOM for this signature, can be disabled to prevent issues
+    // with other validation tools or built-in libraries from languages such as .NET/C# with their default implementations.
+    // @see https://github.com/robrichards/xmlseclibs/issues/247
+    'preserve_whitespace' => true,
+]);
 // Use the c14n exclusive canonicalization
 $objDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
 // Sign using SHA-256
